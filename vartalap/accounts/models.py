@@ -5,12 +5,9 @@ class Profile(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE)
     bio=models.TextField(blank=True)
     created=models.DateTimeField(auto_now_add=True)
-    profileimage=models.ImageField(
-        upload_to='profiles/',
-        blank=True,
-        null=True
-    )
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
     last_seen=models.DateTimeField(default=now)
+    is_chat_active = models.BooleanField(default=False)
     def __str__(self):
         return self.user.username
 

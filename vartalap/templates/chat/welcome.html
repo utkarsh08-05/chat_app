@@ -1,0 +1,267 @@
+{% extends "layout.html" %}
+{% block title %}Welcome · Vartalap{% endblock %}
+
+{% block content %}
+<style>
+/* ======================================================
+   HERO BASE
+====================================================== */
+.hero {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ======================================================
+   PARALLAX BACKGROUND ORBS
+====================================================== */
+.orb {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.55;
+  transition: transform 0.1s linear;
+}
+
+.orb.blue { background: #4f46e5; top: 10%; left: 15%; }
+.orb.cyan { background: #22d3ee; bottom: 10%; right: 20%; }
+
+/* ======================================================
+   HERO CARD
+====================================================== */
+.hero-card {
+  width: 100%;
+  max-width: 1000px;
+  padding: 72px;
+  border-radius: 32px;
+  background: var(--nav-bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 80px 180px rgba(0,0,0,0.25);
+  position: relative;
+  z-index: 2;
+}
+
+/* ======================================================
+   BRAND
+====================================================== */
+.hero-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg,#4f46e5,#6366f1);
+  color: white;
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ======================================================
+   TEXT
+====================================================== */
+.hero-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-top: 28px;
+}
+
+.hero-highlight {
+  background: linear-gradient(90deg,#4f46e5,#22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+  margin-top: 16px;
+  color: var(--muted);
+  max-width: 540px;
+  line-height: 1.6;
+}
+
+/* ======================================================
+   CTA
+====================================================== */
+.hero-actions {
+  margin-top: 36px;
+  display: flex;
+  gap: 16px;
+}
+
+.hero-actions a {
+  padding: 14px 30px;
+  border-radius: 16px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-primary-grand {
+  background: var(--brand);
+  color: white;
+}
+
+.btn-secondary-grand {
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+/* ======================================================
+   GAMIFIED MESSAGE BUBBLES
+====================================================== */
+.bubble {
+  position: absolute;
+  padding: 10px 18px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  cursor: pointer;
+  animation: floatUp 12s linear infinite;
+  user-select: none;
+}
+
+@keyframes floatUp {
+  from { transform: translateY(100vh); }
+  to { transform: translateY(-200px); }
+}
+
+body.dark .bubble {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+/* ======================================================
+   SCORE HUD
+====================================================== */
+.score {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: var(--nav-bg);
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+}
+
+/* ======================================================
+   CURSOR RIPPLE
+====================================================== */
+.ripple {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(79,70,229,0.4);
+  transform: scale(0);
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(6);
+    opacity: 0;
+  }
+}
+</style>
+
+<div class="hero">
+  <div class="orb blue"></div>
+  <div class="orb cyan"></div>
+
+  <div class="hero-card">
+    <div class="hero-logo">V</div>
+
+    <div class="hero-title">
+      Chat that feels
+      <span class="hero-highlight">alive</span>
+    </div>
+
+    <div class="hero-subtitle">
+      Tap the floating messages. Feel the interaction.
+      Welcome to a chat experience designed for humans.
+    </div>
+
+    <div class="hero-actions">
+      <a href="{% url 'login' %}" class="btn-primary-grand">Log in</a>
+      <a href="{% url 'register' %}" class="btn-secondary-grand">Create account</a>
+    </div>
+  </div>
+</div>
+
+<div class="score">
+  🎯 Interaction score: <span id="score">0</span>
+</div>
+
+<script>
+/* ======================================================
+   PARALLAX ORBS
+====================================================== */
+document.addEventListener("mousemove", e => {
+  document.querySelectorAll(".orb").forEach((orb, i) => {
+    const speed = (i + 1) * 0.02;
+    orb.style.transform =
+      `translate(${e.clientX * speed}px, ${e.clientY * speed}px)`;
+  });
+});
+
+/* ======================================================
+   FLOATING MESSAGE BUBBLES
+====================================================== */
+let score = 0;
+const messages = [
+  "Hello 👋",
+  "Start chatting 💬",
+  "Pop me!",
+  "Real-time ✨",
+  "Privacy 🔒",
+  "Dark mode 🌙",
+  "Tap tap 👆"
+];
+
+function spawnBubble() {
+  const bubble = document.createElement("div");
+  bubble.className = "bubble";
+  bubble.textContent = messages[Math.floor(Math.random() * messages.length)];
+  bubble.style.left = Math.random() * 80 + "vw";
+  bubble.style.animationDuration = 8 + Math.random() * 6 + "s";
+
+  bubble.onclick = e => {
+    bubble.remove();
+    score++;
+    document.getElementById("score").textContent = score;
+    ripple(e.clientX, e.clientY);
+  };
+
+  document.body.appendChild(bubble);
+
+  setTimeout(() => bubble.remove(), 14000);
+}
+
+setInterval(spawnBubble, 1400);
+
+/* ======================================================
+   RIPPLE EFFECT
+====================================================== */
+function ripple(x, y) {
+  const r = document.createElement("div");
+  r.className = "ripple";
+  r.style.left = x + "px";
+  r.style.top = y + "px";
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 600);
+}
+</script>
+
+{% endblock %}

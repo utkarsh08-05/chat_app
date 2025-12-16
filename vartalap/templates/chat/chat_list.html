@@ -1,0 +1,136 @@
+{% load static %}
+
+<style>
+.chat-list-wrapper {
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: #ffffff;
+}
+
+.chat-user {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.2s;
+}
+
+.chat-user:hover {
+  background: #f5f7ff;
+}
+
+.chat-user.active {
+  background: #e0e7ff;
+}
+
+.chat-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.chat-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat-username {
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-preview {
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* 🌙 DARK MODE — CHAT LIST */
+body.dark .chat-list-wrapper {
+  background: #020617;
+}
+
+body.dark .chat-user {
+  border-bottom: 1px solid #1f2937;
+}
+
+body.dark .chat-user:hover {
+  background: #020617;
+}
+
+body.dark .chat-user.active {
+  background: #0f172a;
+}
+
+body.dark .chat-username {
+  color: #e5e7eb;
+}
+
+body.dark .chat-preview {
+  color: #9ca3af;
+}
+
+body.dark .chat-avatar {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+</style>
+
+<div class="chat-list-wrapper">
+  <div class="p-3 fw-semibold">
+    Welcome {{ request.user.username }}
+  </div>
+
+  {% for user in users %}
+    <a href="{% url 'chat_home' user.id %}" class="text-decoration-none text-dark">
+      <div class="chat-user {% if other_user and user.id == other_user.id %}active{% endif %}">
+        
+       <div class="chat-avatar">
+  {% if user.profile.avatar %}
+    <img src="{{ user.profile.avatar.url }}"
+         class="rounded-circle"
+         width="44" height="44">
+  {% else %}
+    {{ user.username|slice:":2"|upper }}
+  {% endif %}
+</div>
+
+
+        <div class="chat-user-info">
+          <div class="chat-username">
+            {{ user.username }}
+
+            {% if user.unread_count %}
+              <span class="badge bg-primary rounded-pill">
+                {{ user.unread_count }}
+              </span>
+            {% endif %}
+          </div>
+
+          <div class="chat-preview">
+            {% if user.last_message %}
+              {{ user.last_message.content|truncatechars:30 }}
+            {% else %}
+              No messages yet
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </a>
+  {% empty %}
+    <div class="text-center text-muted p-4">
+      No users found
+    </div>
+  {% endfor %}
+</div>

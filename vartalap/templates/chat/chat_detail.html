@@ -1,64 +1,499 @@
-{% extends "layout.html" %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
 
-{% block content %}
-<h4>
-  Chat with {{ other_user.username }}
-  <span id="status-dot" style="font-size:14px; margin-left:8px;"></span>
-</h4>
+    <style>
+      /* ================= WRAPPER ================= */
+      .chat-wrapper {
+  width: 100%;
+  height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 
-<div id="chat-box" class="border p-3 mb-3" style="height:400px; overflow-y:auto;">
-  <p class="text-muted">Loading messages...</p>
+  /* LIGHT */
+  background: linear-gradient(
+    180deg,
+    rgba(169, 217, 248, 0.85),
+    rgba(194, 150, 221, 0.16)
+  );
+}
+
+/* 🌙 DARK MODE */
+body.dark .chat-wrapper {
+  background: linear-gradient(
+    180deg,
+    #020617,
+    #020617
+  );
+}
+body.dark .chat-header {
+  background: #020617;
+  border-bottom: 1px solid #1f2937;
+}
+
+body.dark .chat-header strong {
+  color: #e5e7eb;
+}
+/* 🌙 DARK MODE — INCOMING */
+body.dark .msg-group.other .msg-bubble {
+  background: #0f172a;
+  color: #e5e7eb;
+  box-shadow: none;
+}
+
+/* 🌙 DARK MODE — OUTGOING */
+body.dark .msg-group.you .msg-bubble {
+  background: linear-gradient(180deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+}
+
+/* META */
+body.dark .msg-meta {
+  color: #9ca3af;
+}
+body.dark .chat-input {
+  background: #020617;
+  border-top: 1px solid #1f2937;
+}
+
+body.dark .chat-input input {
+  background: #0f172a;
+  color: #e5e7eb;
+  border: 1px solid #1f2937;
+}
+
+body.dark .chat-input input::placeholder {
+  color: #9ca3af;
+}
+body.dark .badge.bg-primary {
+  background-color: #2563eb !important;
+}
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #22c55e;
+}
+
+body.dark .status-dot {
+  background-color: #4ade80;
+}
+
+/* 🌙 DARK MODE OVERRIDE */
+body.dark .chat-wrapper {
+  background: linear-gradient(
+    180deg,
+    #020617,
+    #020617
+  );
+}
+/* 🌙 DARK MODE BUBBLES */
+body.dark .msg-group.other .msg-bubble {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+body.dark .msg-meta {
+  color: #9ca3af;
+}
+body.dark .chat-header {
+  background: #020617;
+  border-bottom: 1px solid #1f2937;
+}
+
+      .msg-meta .ticks {
+        margin-left: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #080908ff; /* light blue */
+      }
+
+      .msg-group.you .msg-meta .ticks {
+        color: #0f0f0fff;
+      }
+
+      /* ================= HEADER ================= */
+      .chat-header {
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .chat-header img {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+      }
+
+      .chat-header-name {
+        font-weight: 600;
+      }
+
+      .chat-header-status {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      /* ================= BODY ================= */
+      .chat-body {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+        min-height: 0;
+      }
+
+      /* ================= MESSAGE GROUP ================= */
+      .msg-group {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 14px;
+      }
+
+      .msg-group.you {
+        align-items: flex-end;
+      }
+
+      .msg-group.other {
+        align-items: flex-start;
+      }
+
+      /* ================= MESSAGE BUBBLE ================= */
+      .msg-bubble {
+        max-width: 72%;
+        padding: 10px 16px;
+        font-size: 0.95rem;
+        line-height: 1.45;
+
+        background: rgba(255, 255, 255, 0.85);
+        color: var(--text);
+
+        border-radius: 18px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12),
+          0 4px 10px rgba(15, 23, 42, 0.08);
+
+        margin-bottom: 4px;
+      }
+
+      /* YOU */
+      .msg-group.you .msg-bubble {
+        background: linear-gradient(180deg, #4f8df7, #3b82f6);
+        color: white;
+
+        box-shadow: 0 16px 36px rgba(59, 130, 246, 0.45),
+          0 6px 14px rgba(59, 130, 246, 0.35);
+      }
+
+      /* ================= GROUP SHAPES ================= */
+      .msg-bubble.first {
+        border-bottom-left-radius: 14px;
+        border-bottom-right-radius: 14px;
+      }
+
+      .msg-bubble.middle {
+        border-radius: 14px;
+      }
+
+      .msg-bubble.last {
+        border-top-left-radius: 14px;
+        border-top-right-radius: 14px;
+        position: relative;
+      }
+
+      /* ================= TAIL ================= */
+      .msg-group.you .msg-bubble.last::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        bottom: 6px;
+        width: 12px;
+        height: 12px;
+        background: inherit;
+        border-radius: 0 0 0 12px;
+      }
+
+      .msg-group.other .msg-bubble.last::after {
+        content: "";
+        position: absolute;
+        left: -6px;
+        bottom: 6px;
+        width: 12px;
+        height: 12px;
+        background: inherit;
+        border-radius: 0 0 12px 0;
+      }
+
+      /* ================= META ================= */
+      .msg-meta {
+        font-size: 0.72rem;
+        color: rgba(100, 116, 139, 0.9);
+        margin-top: 2px;
+      }
+
+      .msg-group.you .msg-meta {
+        text-align: right;
+        color: rgba(219, 234, 254, 0.9);
+      }
+
+      /* ================= INPUT ================= */
+      .chat-input {
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        border-top: 1px solid var(--border);
+      }
+
+      .chat-input input {
+        border-radius: 20px;
+      }
+
+      .chat-input button {
+        border-radius: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-wrapper h-100 d-flex flex-column">
+      <!-- HEADER -->
+      <div class="chat-header">
+  {% if other_user.profile.avatar %}
+    <img src="{{ other_user.profile.avatar.url }}"
+         class="rounded-circle"
+         width="44" height="44">
+  {% else %}
+    <div class="chat-avatar">
+      {{ other_user.username|slice:":2"|upper }}
+    </div>
+  {% endif %}
+
+  <div>
+    <strong>{{ other_user.username }}</strong><br>
+    <small id="statusText">Loading…</small>
+  </div>
 </div>
 
-<form method="post">
-  {% csrf_token %}
-  <div class="input-group">
-    <input type="text" name="content" class="form-control" placeholder="Type a message" required>
-    <button class="btn btn-primary">Send</button>
-  </div>
-</form>
+
+      <!-- BODY -->
+      <div id="chatBody" class="chat-body"></div>
+
+      <!-- INPUT -->
+      <div class="chat-input">
+        <input
+          id="msgInput"
+          class="form-control"
+          placeholder="Type a message"
+        />
+      </div>
+    </div>
 
 <script>
-const chatBox = document.getElementById("chat-box");
-const statusDot = document.getElementById("status-dot");
+  let firstLoad = true;
+  let loadingOlder = false;
+  let oldestId = null;
+  let newestId = null;
 
-const messagesUrl = "{% url 'fetch_message' other_user.id %}";
-const statusUrl   = "{% url 'user_status' other_user.id %}";
-const currentUser = "{{ request.user.username }}";
+  const chatBody = document.getElementById("chatBody");
+  const statusText = document.getElementById("statusText");
+  const input = document.getElementById("msgInput");
 
-// -------- Messages --------
-function loadMessages() {
+  const messagesUrl = "{% url 'fetch_message' other_user.id %}";
+  const statusUrl = "{% url 'user_status' other_user.id %}";
+  const me = "{{ request.user.username }}";
+
+  /* ================= SEND MESSAGE ================= */
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && input.value.trim()) {
+      sendMessage(input.value.trim());
+      input.value = "";
+    }
+  });
+
+  function sendMessage(text) {
+    fetch("{% url 'chat_home' other_user.id %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: new URLSearchParams({ content: text }),
+    });
+  }
+
+  /* ================= RENDER ================= */
+  function renderMessages(messages) {
+    let html = "";
+    let i = 0;
+
+    while (i < messages.length) {
+      const sender = messages[i].sender;
+      const isYou = sender === me;
+      let group = [];
+
+      while (i < messages.length && messages[i].sender === sender) {
+        group.push(messages[i++]);
+      }
+
+      html += `<div class="msg-group ${isYou ? "you" : "other"}">`;
+
+      group.forEach((m, idx) => {
+        const pos =
+          idx === 0
+            ? "first"
+            : idx === group.length - 1
+            ? "last"
+            : "middle";
+
+        html += `
+          <div class="msg-bubble ${pos}" data-msg-id="${m.id}">
+            ${m.content}
+          </div>
+        `;
+
+        if (idx === group.length - 1) {
+          html += `
+            <div class="msg-meta">
+              ${isYou ? "You" : m.sender} · ${m.timestamp}
+              ${
+                isYou
+                  ? `<span class="ticks" data-msg-id="${m.id}">
+                       ${m.seen ? "✓✓" : "✓"}
+                     </span>`
+                  : ""
+              }
+            </div>
+          `;
+        }
+      });
+
+      html += `</div>`;
+    }
+
+    return html;
+  }
+
+  /* ================= LOAD INITIAL ================= */
+  function loadMessages() {
     fetch(messagesUrl, { cache: "no-store" })
-        .then(res => res.json())
-        .then(data => {
-            chatBox.innerHTML = "";
-            data.messages.forEach(msg => {
-                const sender = msg.sender === currentUser ? "You" : msg.sender;
-                chatBox.innerHTML += `
-                    <div class="mb-2">
-                        <b>${sender}</b>: ${msg.content}
-                        <small class="text-muted">${msg.timestamp}</small>
-                    </div>
-                `;
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-}
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.messages.length) return;
 
-// -------- Status --------
-function loadStatus() {
+        chatBody.innerHTML = renderMessages(d.messages);
+        oldestId = d.messages[0].id;
+        newestId = d.messages[d.messages.length - 1].id;
+
+        chatBody.scrollTop = chatBody.scrollHeight;
+        firstLoad = false;
+      });
+  }
+
+  /* ================= POLL NEW ================= */
+  function pollNewMessages() {
+    if (!newestId) return;
+
+    fetch(`${messagesUrl}?after=${newestId}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.messages.length) return;
+
+        chatBody.insertAdjacentHTML(
+          "beforeend",
+          renderMessages(d.messages)
+        );
+
+        newestId = d.messages[d.messages.length - 1].id;
+        chatBody.scrollTop = chatBody.scrollHeight;
+      });
+  }
+
+  /* ================= SYNC SEEN (✓ → ✓✓) ================= */
+  function syncSeenStatus() {
+    if (!newestId) return;
+
+    fetch(`${messagesUrl}?after=${newestId - 10}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.messages.length) return;
+
+        d.messages.forEach((m) => {
+          if (m.seen) {
+            const tickEl = document.querySelector(
+              `.ticks[data-msg-id="${m.id}"]`
+            );
+            if (tickEl) {
+              tickEl.textContent = "✓✓";
+            }
+          }
+        });
+      });
+  }
+
+  /* ================= LOAD OLDER ================= */
+  chatBody.addEventListener("scroll", () => {
+    if (chatBody.scrollTop === 0 && oldestId && !loadingOlder) {
+      loadingOlder = true;
+
+      fetch(`${messagesUrl}?before=${oldestId}`, { cache: "no-store" })
+        .then((r) => r.json())
+        .then((d) => {
+          if (!d.messages.length) {
+            loadingOlder = false;
+            return;
+          }
+
+          const prevHeight = chatBody.scrollHeight;
+
+          chatBody.insertAdjacentHTML(
+            "afterbegin",
+            renderMessages(d.messages)
+          );
+
+          chatBody.scrollTop = chatBody.scrollHeight - prevHeight;
+          oldestId = d.messages[0].id;
+          loadingOlder = false;
+        });
+    }
+  });
+
+  /* ================= STATUS ================= */
+  function loadStatus() {
     fetch(statusUrl, { cache: "no-store" })
-        .then(res => res.json())
-        .then(data => {
-            statusDot.innerHTML = data.online ? "● Online" : "● Offline";
-            statusDot.style.color = data.online ? "green" : "gray";
-        });
-}
+      .then((r) => r.json())
+      .then((d) => {
+        statusText.textContent = d.online ? "Online" : "Offline";
+      });
+  }
 
-setInterval(loadMessages, 2000);
-setInterval(loadStatus, 3000);
+  /* ================= CHAT PRESENCE ================= */
 
-loadMessages();
-loadStatus();
+  // Mark chat as active when this page loads
+  fetch("{% url 'chat_active' %}", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+    },
+  });
+
+  // Mark chat inactive when leaving the page
+  window.addEventListener("beforeunload", () => {
+    navigator.sendBeacon("{% url 'chat_inactive' %}");
+  });
+
+  /* ================= INIT ================= */
+  loadMessages();
+  loadStatus();
+
+  setInterval(pollNewMessages, 2000);
+  setInterval(syncSeenStatus, 2000);
+  setInterval(loadStatus, 3000);
 </script>
-{% endblock %}
+
+
+  </body>
+</html>
