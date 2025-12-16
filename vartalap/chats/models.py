@@ -8,7 +8,7 @@ class Message(models.Model):
         related_name='sent_message'
 
     )
-    reciever=models.ForeignKey(
+    receiver=models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='recieved_message'
@@ -32,4 +32,4 @@ class Message(models.Model):
     timestamp=models.DateTimeField(auto_now_add=True)
     is_seen=models.BooleanField(default=False)
     def __str__(self):
-        return f"{self.sender}---> {self.reciever}"
+        return f"{self.sender}---> {self.receiver}"

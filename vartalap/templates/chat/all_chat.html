@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h3 class="mb-3">Users</h3>
+
+<ul class="list-group">
+    {% for user in users %}
+       <a href="{% url 'chat_detail' user.id %}">
+    {{ user.username }}
+</a>
+    {% empty %}
+        <li class="list-group-item text-muted">
+            No users found
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
