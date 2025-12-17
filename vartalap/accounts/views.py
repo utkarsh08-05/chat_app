@@ -3,7 +3,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-
+def welcome(request):
+    if request.user.is_authenticated:
+        return redirect("chat_home")
+    return render(request, "welcome.html")
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)

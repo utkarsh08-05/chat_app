@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: chat-app
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn vartalap.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.13.9"
+
+  - type: pserv
+    name: chat-app-db
+    plan: free
+    dbName: chat_app_db
+    dbUser: chat_app_user
