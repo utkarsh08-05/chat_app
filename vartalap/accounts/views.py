@@ -26,7 +26,7 @@ class CustomLoginView(LoginView):
     template_name='accounts/login.html'
 def logout_view(request):
     logout(request)
-    return render(request,'chat/welcome.html')
+    return render(request,'welcome.html')
 @login_required
 def update_profile(request):
     profile = request.user.profile
