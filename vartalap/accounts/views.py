@@ -1,3 +1,6 @@
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from .forms import ProfileForm
 from django.shortcuts import render,redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.views import LoginView
@@ -27,19 +30,26 @@ class CustomLoginView(LoginView):
 def logout_view(request):
     logout(request)
     return render(request,'welcome.html')
+
 @login_required
 def update_profile(request):
     profile = request.user.profile
 
     if request.method == "POST":
-        if request.FILES.get("avatar"):
-            profile.avatar = request.FILES["avatar"]
+        form = ProfileForm(
+            request.POST,
+            request.FILES,
+            instance=profile
+        )
 
-        profile.bio = request.POST.get("bio", "")
-        profile.save()
+        if form.is_valid():
+            form.save()
+            return redirect("chat_home")
 
-        return redirect("chat_home")
+    else:
+        form = ProfileForm(instance=profile)
 
     return render(request, "chat/profile.html", {
-        "profile": profile
+        "form": form,
+        "profile": profile,
     })
