@@ -1,6 +1,50 @@
 {% extends "layout.html" %}
 {% block title %}Chats{% endblock %}
+<style>
+  /* ================= MOBILE CHAT NAV ================= */
+@media (max-width: 768px) {
 
+  .chat-page {
+    height: 100dvh !important;
+    overflow: hidden;
+  }
+
+  /* Default: show chat list */
+  .chat-page.show-list > div:first-child {
+    display: block;
+  }
+
+  .chat-page.show-list > div:last-child {
+    display: none;
+  }
+
+  /* When chat is open */
+  .chat-page.show-chat > div:first-child {
+    display: none;
+  }
+
+  .chat-page.show-chat > div:last-child {
+    display: block;
+  }
+
+  /* Back button */
+  .mobile-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+}
+
+/* Desktop: nothing changes */
+@media (min-width: 769px) {
+  .mobile-back {
+    display: none;
+  }
+}
+
+</style>
 {% block content %}
 <div class="chat-page" style="height: calc(100vh - 64px); display:flex;">
   <div style="width:320px;border-right:1px solid #e5e7eb;">

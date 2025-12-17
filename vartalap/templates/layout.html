@@ -138,6 +138,65 @@
             color: var(--muted);
             font-size: 0.85rem;
         }
+        /* ================= PROFILE PAGE MOBILE ================= */
+@media (max-width: 768px) {
+
+  .container {
+    margin-top: 16px !important;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .container h4 {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+
+  /* Avatar */
+  .container img.rounded-circle,
+  .container .rounded-circle {
+    width: 100px !important;
+    height: 100px !important;
+    font-size: 1.2rem;
+  }
+
+  /* Form labels */
+  .form-label {
+    font-size: 0.85rem;
+  }
+
+  /* Inputs & textarea */
+  input[type="text"],
+  input[type="file"],
+  textarea {
+    font-size: 0.95rem;
+    padding: 10px 12px;
+  }
+
+  textarea {
+    min-height: 90px;
+  }
+
+  /* Save button */
+  button.btn {
+    padding: 12px;
+    font-size: 0.95rem;
+    border-radius: 10px;
+  }
+}
+
+/* ================= SMALL PHONES ================= */
+@media (max-width: 380px) {
+  .container h4 {
+    font-size: 1rem;
+  }
+
+  button.btn {
+    font-size: 0.9rem;
+  }
+}
+
     </style>
 </head>
 

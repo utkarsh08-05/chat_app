@@ -257,12 +257,137 @@ body.dark .chat-header {
       .chat-input button {
         border-radius: 20px;
       }
+      /* ================= MOBILE OPTIMIZATION ================= */
+@media (max-width: 768px) {
+
+  /* Wrapper height fix for mobile browsers */
+  .chat-wrapper {
+    height: 100dvh; /* dynamic viewport */
+  }
+
+  /* ---------- HEADER ---------- */
+  .chat-header {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .chat-header img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .chat-header strong {
+    font-size: 0.95rem;
+  }
+
+  #statusText {
+    font-size: 0.7rem;
+  }
+
+  /* ---------- CHAT BODY ---------- */
+  .chat-body {
+    padding: 12px;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ---------- MESSAGE BUBBLES ---------- */
+  .msg-bubble {
+    max-width: 85%;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    border-radius: 16px;
+  }
+
+  .msg-bubble.first,
+  .msg-bubble.middle,
+  .msg-bubble.last {
+    border-radius: 16px;
+  }
+
+  /* Reduce tail size on mobile */
+  .msg-group.you .msg-bubble.last::after,
+  .msg-group.other .msg-bubble.last::after {
+    width: 10px;
+    height: 10px;
+    bottom: 5px;
+  }
+
+  /* ---------- META ---------- */
+  .msg-meta {
+    font-size: 0.65rem;
+    margin-top: 2px;
+  }
+
+  .msg-meta .ticks {
+    font-size: 0.7rem;
+  }
+
+  /* ---------- INPUT ---------- */
+  .chat-input {
+    padding: 10px;
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+  }
+
+  .chat-input input {
+    font-size: 0.95rem;
+    padding: 10px 14px;
+    height: 42px;
+  }
+}
+
+/* ================= SMALL PHONES ================= */
+@media (max-width: 380px) {
+  .msg-bubble {
+    max-width: 90%;
+    font-size: 0.85rem;
+  }
+
+  .chat-header strong {
+    font-size: 0.9rem;
+  }
+}
+/* ================= MOBILE BACK BUTTON ================= */
+.mobile-back {
+  display: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding-right: 6px;
+  user-select: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-back {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+/* ================= MOBILE VIEW SWITCH ================= */
+@media (max-width: 768px) {
+
+  .chat-wrapper.show-list .chat-body,
+  .chat-wrapper.show-list .chat-input {
+    display: none;
+  }
+
+  .chat-wrapper.show-chat .chat-body,
+  .chat-wrapper.show-chat .chat-input {
+    display: block;
+  }
+}
+
+
     </style>
   </head>
   <body>
     <div class="chat-wrapper h-100 d-flex flex-column">
       <!-- HEADER -->
       <div class="chat-header">
+        <span class="mobile-back" onclick="showChatList()">← Back</span>
+
   {% if other_user.profile.avatar %}
     <img src="{{ other_user.profile.avatar.url }}"
          class="rounded-circle"
@@ -376,7 +501,25 @@ body.dark .chat-header {
 
     return html;
   }
+function showChatList() {
+  const page = document.querySelector(".chat-wrapper");
+  page.classList.remove("show-chat");
+  page.classList.add("show-list");
+}
 
+function showChatDetail() {
+  const page = document.querySelector(".chat-wrapper");
+  page.classList.remove("show-list");
+  page.classList.add("show-chat");
+}
+
+if (window.innerWidth <= 768) {
+  document.querySelector(".chat-wrapper")?.classList.add("show-list");
+}
+  // Default state on mobile
+  if (window.innerWidth <= 768) {
+    document.querySelector(".chat-page")?.classList.add("show-list");
+  }
   /* ================= LOAD INITIAL ================= */
   function loadMessages() {
     fetch(messagesUrl, { cache: "no-store" })

@@ -83,6 +83,32 @@ body.dark .chat-avatar {
   background: #1f2937;
   color: #e5e7eb;
 }
+/* ================= MOBILE CHAT LIST ================= */
+@media (max-width: 768px) {
+
+  .chat-list-wrapper {
+    height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .chat-user {
+    padding: 12px 14px;
+  }
+
+  .chat-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 0.85rem;
+  }
+
+  .chat-username {
+    font-size: 0.9rem;
+  }
+
+  .chat-preview {
+    font-size: 0.75rem;
+  }
+}
 
 </style>
 
@@ -92,9 +118,12 @@ body.dark .chat-avatar {
   </div>
 
   {% for user in users %}
-    <a href="{% url 'chat_home' user.id %}" class="text-decoration-none text-dark">
-      <div class="chat-user {% if other_user and user.id == other_user.id %}active{% endif %}">
-        
+
+  <div class="chat-user {% if other_user and user.id == other_user.id %}active{% endif %}">
+        <a href="{% url 'chat_home' user.id %}"
+   class="text-decoration-none text-dark"
+   onclick="showChatDetail()">
+
        <div class="chat-avatar">
   {% if user.profile.avatar %}
     <img src="{{ user.profile.avatar.url }}"
